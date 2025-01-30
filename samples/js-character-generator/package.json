@@ -3,19 +3,20 @@
   "version": "0.1.0",
   "description": "A simple Firebase Genkit app to generate fantasy characters",
   "main": "index.js",
-  "scripts": {
-    "dev": "genkit start -- npx tsx --watch index.ts"
+  "scripts": { 
+    "start_with_key_check": "if [ -z \"${GOOGLE_GENAI_API_KEY}\" ]; then echo 'No Gemini API key detected, enter a Gemini API key from https://aistudio.google.com/app/apikey:' && read -s GOOGLE_GENAI_API_KEY && export GOOGLE_GENAI_API_KEY; fi && npm run start",
+    "start": "genkit start -- npx tsx --watch index.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "genkit-cli": "^0.9",
+    "genkit-cli": "^1.0.0-rc.11",
     "tsx": "^4.19.2",
     "typescript": "^5.6.3"
   },
   "dependencies": {
-    "@genkit-ai/googleai": "^0.9",
-    "genkit": "^0.9"
+    "@genkit-ai/googleai": "^1.0.0-rc.11",
+    "genkit": "^1.0.0-rc.11"
   }
 }

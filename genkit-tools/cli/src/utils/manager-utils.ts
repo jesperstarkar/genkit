@@ -97,6 +97,12 @@ export async function runWithManager(
   }
 }
 
+/**
+ * Fetches an existing Telemetry Server URL from servers config. Otherwise,
+ * creates a new server and updates the server config.
+ *
+ * @returns telemetry server url
+ */
 async function getOrStartTelemetryServer(): Promise<string> {
   const serversDir = await findServersDir();
   const telemetryPath = path.join(serversDir, 'telemetry.json');
@@ -124,6 +130,11 @@ async function getOrStartTelemetryServer(): Promise<string> {
   return await startNewTelemetryServer();
 }
 
+/**
+ * Creates a new server and updates the server config.
+ *
+ * @returns telemetry server url
+ */
 async function startNewTelemetryServer(): Promise<string> {
   const telemetryPort = await getPort({ port: makeRange(4033, 4999) });
   const telemetryServerUrl = `http://localhost:${telemetryPort}`;

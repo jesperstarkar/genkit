@@ -176,6 +176,9 @@ function genkit::install_cargo_cli_tools() {
 function genkit::install_pnpm_cli_tools() {
   # Install the Genkit CLI. See: https://firebase.google.com/docs/genkit/devtools
   pnpm add -g genkit-cli
+
+  # Install Biomejs.
+  pnpm add -g @biomejs/biome
 }
 
 PYTHON_CLI_TOOLS=(

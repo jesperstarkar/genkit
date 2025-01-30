@@ -23,8 +23,24 @@ import {
   GenkitToolsError,
   RuntimeManager,
 } from '@genkit-ai/tools-common/manager';
-import { logger } from '@genkit-ai/tools-common/utils';
+import { findServersDir, logger } from '@genkit-ai/tools-common/utils';
+import axios from 'axios';
+import * as clc from 'colorette';
+import fs from 'fs/promises';
 import getPort, { makeRange } from 'get-port';
+import path from 'path';
+
+export interface TelemetryInfo {
+  /** URL of the telemetry server. */
+  url: string;
+}
+
+/**
+ * Checks if the provided data is a valid telemetry server state file.
+ */
+export function isValidTelemetryInfo(data: any): data is TelemetryInfo {
+  return typeof data === 'object' && typeof data.url === 'string';
+}
 
 /**
  * Returns the telemetry server address either based on environment setup or starts one.
@@ -34,12 +50,7 @@ import getPort, { makeRange } from 'get-port';
 export async function resolveTelemetryServer(): Promise<string> {
   let telemetryServerUrl = process.env.GENKIT_TELEMETRY_SERVER;
   if (!telemetryServerUrl) {
-    const telemetryPort = await getPort({ port: makeRange(4033, 4999) });
-    telemetryServerUrl = `http://localhost:${telemetryPort}`;
-    startTelemetryServer({
-      port: telemetryPort,
-      traceStore: new LocalFileTraceStore(),
-    });
+    telemetryServerUrl = await getOrStartTelemetryServer();
   }
   return telemetryServerUrl;
 }
@@ -84,4 +95,51 @@ export async function runWithManager(
     logger.error('Stack trace:');
     logger.error(`${error.stack}`);
   }
+}
+
+async function getOrStartTelemetryServer(): Promise<string> {
+  const serversDir = await findServersDir();
+  const telemetryPath = path.join(serversDir, 'telemetry.json');
+  try {
+    const toolsJsonContent = await fs.readFile(telemetryPath, 'utf-8');
+    const serverInfo = JSON.parse(toolsJsonContent) as TelemetryInfo;
+    if (isValidTelemetryInfo(serverInfo)) {
+      try {
+        await axios.get(`${serverInfo.url}/api/__health`);
+        logger.info(
+          clc.green(
+            `\nTelemetry server is already running at: ${serverInfo.url}`
+          )
+        );
+        return serverInfo.url;
+      } catch (error) {
+        logger.debug(
+          'Found Telemetry server metadata but server is not healthy. Starting a new one...'
+        );
+      }
+    }
+  } catch (error) {
+    logger.debug('No telemetry config found. Starting a new one...');
+  }
+  return await startNewTelemetryServer();
+}
+
+async function startNewTelemetryServer(): Promise<string> {
+  const telemetryPort = await getPort({ port: makeRange(4033, 4999) });
+  const telemetryServerUrl = `http://localhost:${telemetryPort}`;
+  startTelemetryServer({
+    port: telemetryPort,
+    traceStore: new LocalFileTraceStore(),
+  });
+
+  const serversDir = await findServersDir();
+  await fs.mkdir(serversDir, { recursive: true });
+  const telemetryPath = path.join(serversDir, 'telemetry.json');
+  const telemeryInfo: TelemetryInfo = { url: telemetryServerUrl };
+  await fs.writeFile(
+    telemetryPath,
+    JSON.stringify(telemeryInfo, undefined, '  ')
+  );
+  logger.debug(`Updated telemetry config at ${telemetryPath}`);
+  return telemetryServerUrl;
 }

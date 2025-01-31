@@ -37,19 +37,62 @@
           "run": "py/bin/fmt"
         },
         {
-          "run": "uvx --directory py ruff check --fix ."
+          "run": "uvx --directory py ruff check --fix .",
+          "conditions": [
+            {
+              "run": "CaptainHook::FileChanged.Any",
+              "options": {
+                "files": ["*.py"]
+              }
+            }
+          ]
         },
         {
-          "run": "uv run --directory py pytest ."
+          "run": "uv run --directory py pytest .",
+          "conditions": [
+            {
+              "run": "CaptainHook::FileChanged.Any",
+              "options": {
+                "files": ["*.py"]
+              }
+            }
+          ]
         },
         {
-          "run": "uv run --directory py mkdocs build"
+          "run": "uv run --directory py mkdocs build",
+          "conditions": [
+            {
+              "run": "CaptainHook::FileChanged.Any",
+              "options": {
+                "files": ["py/engdocs/**/*.md"]
+              }
+            }
+          ]
         },
         {
           "run": "py/bin/build_dists"
         },
         {
-          "run": "go test go/..."
+          "run": "go test go/...",
+          "conditions": [
+            {
+              "run": "CaptainHook::FileChanged.Any",
+              "options": {
+                "files": ["go/go.mod", "go.sum", "*.go"]
+              }
+            }
+          ]
+        },
+        {
+          "run": "govulncheck -C go ./...",
+          "conditions": [
+            {
+              "run": "CaptainHook::FileChanged.Any",
+              "options": {
+                "files": ["go/go.mod", "go.sum", "*.go"]
+              }
+            }
+          ]
         }
       ]
     },
@@ -74,19 +117,62 @@
           "run": "py/bin/fmt"
         },
         {
-          "run": "uvx --directory py ruff check --fix ."
+          "run": "uvx --directory py ruff check --fix .",
+          "conditions": [
+            {
+              "run": "CaptainHook::FileChanged.Any",
+              "options": {
+                "files": ["*.py"]
+              }
+            }
+          ]
         },
         {
-          "run": "uv run --directory py pytest ."
+          "run": "uv run --directory py pytest .",
+          "conditions": [
+            {
+              "run": "CaptainHook::FileChanged.Any",
+              "options": {
+                "files": ["*.py"]
+              }
+            }
+          ]
         },
         {
-          "run": "uv run --directory py mkdocs build"
+          "run": "uv run --directory py mkdocs build",
+          "conditions": [
+            {
+              "run": "CaptainHook::FileChanged.Any",
+              "options": {
+                "files": ["py/engdocs/**/*.md"]
+              }
+            }
+          ]
         },
         {
           "run": "py/bin/build_dists"
         },
         {
-          "run": "go test go/..."
+          "run": "go test go/...",
+          "conditions": [
+            {
+              "run": "CaptainHook::FileChanged.Any",
+              "options": {
+                "files": ["go/go.mod", "go.sum", "*.go"]
+              }
+            }
+          ]
+        },
+        {
+          "run": "govulncheck -C go ./...",
+          "conditions": [
+            {
+              "run": "CaptainHook::FileChanged.Any",
+              "options": {
+                "files": ["go/go.mod", "go.sum", "*.go"]
+              }
+            }
+          ]
         },
         {
           "run": "py/.hooks/commit-message-format-pre-push"

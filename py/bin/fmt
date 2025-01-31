@@ -49,6 +49,7 @@ popd
 # Format all TypeScript code.
 pushd ${TOP_DIR}
 pnpm run format
+#pnpm run format:fast
 if [[ $? -ne 0 ]]; then
   exit 1
 fi
